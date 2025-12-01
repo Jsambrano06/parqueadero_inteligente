@@ -12,6 +12,9 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
+// Base path del proyecto (ruta dentro de htdocs). Ajusta si cambias el nombre de la carpeta.
+define('BASE_PATH', '/parqueadero_inteligente');
+
 /**
  * Obtener conexión PDO
  * @return PDO Conexión a la base de datos

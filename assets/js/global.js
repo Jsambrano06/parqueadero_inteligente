@@ -38,12 +38,23 @@ async function fetchWithCSRF(url, options = {}) {
     
     try {
         const response = await fetch(url, mergedOptions);
-        
+        const text = await response.text();
+        let data = null;
+        try {
+            data = text ? JSON.parse(text) : null;
+        } catch (e) {
+            data = null;
+        }
+
+        // Si la respuesta no es OK, devolvemos el JSON si existe (para mostrar el error de la API)
         if (!response.ok) {
+            // Si el servidor devolvió JSON con detalles de error, retornarlo
+            if (data) return data;
+            // Si no hay JSON, lanzar error genérico
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        return await response.json();
+
+        return data;
     } catch (error) {
         console.error('Error en petición:', error);
         throw error;

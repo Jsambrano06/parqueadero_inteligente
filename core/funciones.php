@@ -34,6 +34,25 @@ function validarPlaca($placa) {
  * @param string $url
  */
 function redirigir($url) {
+    // Si la URL es absoluta (http:// o https://) o esquema protocol-relative, mantenerla
+    if (preg_match('#^https?://#i', $url) || strpos($url, '//') === 0) {
+        header("Location: " . $url);
+        exit();
+    }
+
+    // Si se definió BASE_PATH, anteponerla cuando la URL comienza con '/'
+    if (defined('BASE_PATH')) {
+        // Normalizar la url para asegurar que comienza con '/'
+        if ($url === '' || $url[0] !== '/') {
+            $url = '/' . ltrim($url, '/');
+        }
+
+        // Prevenir duplicar BASE_PATH si ya fue incluida
+        if (strpos($url, BASE_PATH) !== 0) {
+            $url = rtrim(BASE_PATH, '/') . $url;
+        }
+    }
+
     header("Location: " . $url);
     exit();
 }

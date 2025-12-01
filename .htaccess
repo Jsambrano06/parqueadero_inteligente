@@ -4,7 +4,14 @@
 # Habilitar RewriteEngine
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
+    RewriteBase /parqueadero_inteligente/
+</IfModule>
+
+# Redirigir acceso a la raíz del proyecto hacia el login en public (redirige el navegador)
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_URI} ^/parqueadero_inteligente/?$ [OR]
+    RewriteCond %{REQUEST_URI} ^/parqueadero_inteligante$ 
+    RewriteRule ^$ public/login.php [R=302,L]
 </IfModule>
 
 # Proteger archivos sensibles
@@ -19,10 +26,10 @@
     Deny from all
 </FilesMatch>
 
-# Proteger carpetas core y config
-RedirectMatch 403 ^/core/.*$
-RedirectMatch 403 ^/config/.*$
-RedirectMatch 403 ^/sql/.*$
+# Proteger carpetas core y config (apuntar a la ruta del proyecto)
+RedirectMatch 403 ^/parqueadero_inteligente/core/.*$
+RedirectMatch 403 ^/parqueadero_inteligente/config/.*$
+RedirectMatch 403 ^/parqueadero_inteligente/sql/.*$
 
 # Prevenir listado de directorios
 Options -Indexes
@@ -60,9 +67,12 @@ Options -Indexes
     ExpiresByType image/x-icon "access plus 1 year"
 </IfModule>
 
-# Página de error personalizada (opcional)
-ErrorDocument 403 /public/login.php
-ErrorDocument 404 /public/login.php
+# Página de error personalizada (opcional) — apuntar a la ruta del proyecto
+# Excluir la carpeta API para que las respuestas JSON de la API no sean reemplazadas por la página de error HTML
+<If "%{REQUEST_URI} !~ m#^/parqueadero_inteligente/api/#">
+    ErrorDocument 403 /parqueadero_inteligente/public/login.php
+    ErrorDocument 404 /parqueadero_inteligente/public/login.php
+</If>
 
 # PHP Settings de seguridad
 <IfModule mod_php7.c>
