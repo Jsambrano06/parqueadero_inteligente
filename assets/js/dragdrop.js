@@ -102,7 +102,7 @@ const DragDropManager = {
         }
     },
 
-    /**
+/**
      * Drop (soltar elemento)
      */
     onDrop(e) {
@@ -120,7 +120,7 @@ const DragDropManager = {
         const mapWidth = parseInt(mapCanvas.style.width) || mapCanvas.offsetWidth;
         const mapHeight = parseInt(mapCanvas.style.height) || mapCanvas.offsetHeight;
         
-        // Validar límites del canvas usando tamaño real
+        // Usar las dimensiones reales del puesto (que ya incluyen la rotación)
         const puestoWidth = parseInt(this.elementoArrastrado.style.width) || this.elementoArrastrado.offsetWidth;
         const puestoHeight = parseInt(this.elementoArrastrado.style.height) || this.elementoArrastrado.offsetHeight;
         

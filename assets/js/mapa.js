@@ -583,8 +583,8 @@ const MapaParqueadero = {
         }
     },
 
-    /**
-     * Rotar puesto 90 grados
+/**
+     * Rotar puesto - Intercambiar dimensiones físicas
      */
     async rotarPuesto() {
         const puesto = this.puestoSeleccionado;
@@ -592,17 +592,17 @@ const MapaParqueadero = {
         
         if (!elemento) return;
 
+        // Obtener dimensiones actuales
+        const anchoActual = parseInt(elemento.style.width) || elemento.offsetWidth;
+        const altoActual = parseInt(elemento.style.height) || elemento.offsetHeight;
+
+        // Intercambiar dimensiones físicas
+        elemento.style.width = altoActual + 'px';
+        elemento.style.height = anchoActual + 'px';
+
         // Toggle orientación (0 <-> 90)
         const orientacionActual = parseInt(elemento.dataset.orientacion) || 0;
         const nuevaOrientacion = orientacionActual === 0 ? 90 : 0;
-
-        // Toggle clase de rotación visual
-        if (nuevaOrientacion === 90) {
-            elemento.classList.add('rotado-90');
-        } else {
-            elemento.classList.remove('rotado-90');
-        }
-
         elemento.dataset.orientacion = nuevaOrientacion;
 
         try {

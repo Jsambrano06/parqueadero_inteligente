@@ -81,22 +81,6 @@
     z-index: 10;
 }
 
-/* Tamaños según tipo */
-.puesto[data-tipo="1"] { /* Moto */
-    width: 50px;
-    height: 50px;
-}
-
-.puesto[data-tipo="2"] { /* Carro */
-    width: 100px;
-    height: 50px;
-}
-
-.puesto[data-tipo="3"] { /* Camión */
-    width: 150px;
-    height: 50px;
-}
-
 /* Estados de puestos */
 .puesto.libre {
     background-color: #d1fae5;
