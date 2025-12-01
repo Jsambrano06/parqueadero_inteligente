@@ -248,6 +248,39 @@ function closeModal(modalId) {
     if (modal) {
         modal.classList.remove('active');
         document.body.style.overflow = '';
+
+// Handler global: cerrar modal cuando se hace click en un botón con clase .modal-close
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest && e.target.closest('.modal-close');
+    if (!btn) return;
+
+    // Si el botón tiene atributo data-target con id del modal, usarlo
+    const target = btn.getAttribute('data-target');
+    if (target) {
+        window.parkingSystem.closeModal(target);
+        return;
+    }
+
+    // Si el botón tiene onclick inline que ya maneja el cierre, dejarlo (no interferir)
+    // Pero mejor intentar cerrar el modal-overlay más cercano
+    const overlay = btn.closest('.modal-overlay');
+    if (overlay) {
+        // Si el overlay tiene un id que coincide con el modal id, usar closeModal
+        if (overlay.id) {
+            window.parkingSystem.closeModal(overlay.id);
+            return;
+        }
+
+        // Remover la clase active si existe
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        // Si el overlay no es un elemento persistente, removerlo del DOM
+        if (!overlay.querySelector('#' + overlay.id)) {
+            // overlay likely was dynamically created; remove it
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }
+    }
+});
     }
 }
 

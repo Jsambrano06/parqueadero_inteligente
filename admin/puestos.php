@@ -372,7 +372,7 @@ $mensajes = obtenerMensajes();
         <div class="modal">
             <div class="modal-header">
                 <h3>Detalles del Puesto</h3>
-                <button class="modal-close" onclick="window.parkingSystem.closeModal('modalDetalles')">
+                <button type="button" class="modal-close" data-target="modalDetalles" onclick="window.parkingSystem.closeModal('modalDetalles')">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>

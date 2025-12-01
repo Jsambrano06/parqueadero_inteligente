@@ -183,7 +183,7 @@ $mensajes = obtenerMensajes();
         <div class="modal">
             <div class="modal-header">
                 <h3>Agregar Nuevo Puesto</h3>
-                <button class="modal-close" onclick="window.parkingSystem.closeModal('modalAgregarPuesto')">
+                <button type="button" class="modal-close" data-target="modalAgregarPuesto" onclick="window.parkingSystem.closeModal('modalAgregarPuesto')">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
@@ -232,7 +232,7 @@ $mensajes = obtenerMensajes();
         <div class="modal">
             <div class="modal-header">
                 <h3>Acciones del Puesto <span id="puestoCodigoModal"></span></h3>
-                <button class="modal-close" onclick="window.parkingSystem.closeModal('modalAccionesPuesto')">
+                <button type="button" class="modal-close" data-target="modalAccionesPuesto" onclick="window.parkingSystem.closeModal('modalAccionesPuesto')">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
