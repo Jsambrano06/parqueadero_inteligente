@@ -58,7 +58,60 @@ try {
             'success' => true,
             'message' => 'Estado actualizado correctamente'
         ]);
+
+    } else if (isset($_POST['puesto_id']) && isset($_POST['orientacion'])) {
+        // Cambio de orientación
+        $puesto_id = (int)$_POST['puesto_id'];
+        $orientacion = (int)$_POST['orientacion'];
+
+        // Validar orientación
+        if (!in_array($orientacion, [0, 90])) {
+            throw new Exception('Orientación no válida');
+        }
+
+        // Verificar que el puesto existe
+        $sql = "SELECT id, codigo FROM puestos WHERE id = ?";
+        $puesto = obtenerFila($sql, [$puesto_id]);
+
+        if (!$puesto) {
+            throw new Exception('Puesto no encontrado');
+        }
+
+        // Actualizar orientación
+        $sql = "UPDATE puestos SET orientacion = ? WHERE id = ?";
+        ejecutarConsulta($sql, [$orientacion, $puesto_id]);
+
+        // Registrar en log
+        registrarLogMapa($usuario_id, "Puesto {$puesto['codigo']} rotado a {$orientacion} grados");
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Puesto rotado correctamente'
+        ]);
         
+    } else if (isset($_POST['map_width']) && isset($_POST['map_height'])) {
+        // Guardar tamaño del mapa en configuraciones
+        $map_width = (int)$_POST['map_width'];
+        $map_height = (int)$_POST['map_height'];
+
+        // Validar tamaños razonables
+        if ($map_width < 600 || $map_height < 300 || $map_width > 5000 || $map_height > 3000) {
+            throw new Exception('Dimensiones del mapa fuera de rango');
+        }
+
+        // Guardar en configuraciones (insert/update handled by actualizarConfiguracion)
+        if (!actualizarConfiguracion('map_width', $map_width) || !actualizarConfiguracion('map_height', $map_height)) {
+            throw new Exception('No se pudo guardar la configuración del mapa');
+        }
+
+        // Registrar en log
+        registrarLogMapa($usuario_id, "Tamaño del mapa actualizado a: {$map_width}x{$map_height}");
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Tamaño del mapa guardado correctamente'
+        ]);
+
     } else {
         // Cambios de posición (múltiples puestos)
         $input = file_get_contents('php://input');
@@ -74,6 +127,12 @@ try {
             throw new Exception('No hay cambios para guardar');
         }
         
+        // Obtener límites del mapa desde configuración (si existen)
+        $cfg_width = (int)obtenerConfiguracion('map_width');
+        $cfg_height = (int)obtenerConfiguracion('map_height');
+        if ($cfg_width <= 0) $cfg_width = 1200;
+        if ($cfg_height <= 0) $cfg_height = 600;
+
         // Iniciar transacción
         iniciarTransaccion();
         
@@ -88,8 +147,8 @@ try {
             $x = (int)$cambio['x'];
             $y = (int)$cambio['y'];
             
-            // Validar coordenadas
-            if ($x < 0 || $y < 0 || $x > 1200 || $y > 600) {
+            // Validar coordenadas usando límites configurados
+            if ($x < 0 || $y < 0 || $x > $cfg_width || $y > $cfg_height) {
                 continue;
             }
             

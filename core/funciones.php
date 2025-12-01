@@ -75,9 +75,17 @@ function obtenerConfiguracion($nombre) {
  * @return bool
  */
 function actualizarConfiguracion($nombre, $valor) {
-    $sql = "UPDATE configuraciones SET valor = ? WHERE nombre = ?";
     try {
-        ejecutarConsulta($sql, [$valor, $nombre]);
+        // Si existe, actualizar
+        $exists = obtenerFila("SELECT id FROM configuraciones WHERE nombre = ?", [$nombre]);
+        if ($exists) {
+            $sql = "UPDATE configuraciones SET valor = ? WHERE nombre = ?";
+            ejecutarConsulta($sql, [$valor, $nombre]);
+        } else {
+            // Insertar nueva configuración
+            $sql = "INSERT INTO configuraciones (nombre, valor) VALUES (?, ?)";
+            ejecutarConsulta($sql, [$nombre, $valor]);
+        }
         return true;
     } catch (Exception $e) {
         error_log("Error al actualizar configuración: " . $e->getMessage());

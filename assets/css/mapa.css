@@ -14,7 +14,7 @@
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .mapa-canvas {
@@ -25,6 +25,7 @@
         linear-gradient(rgba(226, 232, 240, 0.5) 1px, transparent 1px),
         linear-gradient(90deg, rgba(226, 232, 240, 0.5) 1px, transparent 1px);
     background-size: 20px 20px;
+    overflow: hidden;
 }
 
 /* Controles del mapa */
@@ -77,6 +78,7 @@
     font-size: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     user-select: none;
+    z-index: 10;
 }
 
 /* Tamaños según tipo */
@@ -119,15 +121,27 @@
 .modo-edicion .puesto.libre:hover,
 .modo-edicion .puesto.inactivo:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    cursor: move;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: grab;
 }
 
 /* Dragging */
 .puesto.dragging {
-    opacity: 0.5;
+    opacity: 0.7;
     cursor: grabbing;
-    z-index: 1000;
+    z-index: 1001;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Rotación de puestos */
+.puesto.rotado-90 {
+    transform-origin: center center;
+}
+
+.puesto.rotado-90 {
+    /* Intercambiar ancho y alto visualmente */
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
 }
 
 /* Iconos de vehículos */
@@ -165,7 +179,7 @@
     pointer-events: none;
     transition: opacity 0.2s;
     margin-bottom: 8px;
-    z-index: 100;
+    z-index: 1000;
 }
 
 .puesto-info::after {

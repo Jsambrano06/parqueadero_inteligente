@@ -18,6 +18,12 @@ const MapaParqueadero = {
         this.puestos = window.puestosData || [];
         this.renderizarPuestos();
         this.inicializarEventos();
+        // Aplicar tamaño del mapa desde configuración
+        const cfg = window.mapSettings || { width: 1200, height: 600 };
+        // base for visual scaling
+        this.BASE_WIDTH = 1200;
+        this.BASE_HEIGHT = 600;
+        this.aplicarTamanioMapa(cfg.width, cfg.height);
         console.log('Mapa inicializado con', this.puestos.length, 'puestos');
     },
 
@@ -43,8 +49,15 @@ const MapaParqueadero = {
         div.dataset.id = puesto.id;
         div.dataset.tipo = puesto.tipo_id;
         div.dataset.estado = puesto.estado;
+        div.dataset.orientacion = puesto.orientacion || 0; // 0 = horizontal, 90 = vertical
         div.style.left = puesto.x + 'px';
         div.style.top = puesto.y + 'px';
+        
+        // Aplicar rotación si existe
+        const rotacion = puesto.orientacion || 0;
+        if (rotacion === 90) {
+            div.classList.add('rotado-90');
+        }
 
         // Icono según tipo
         const iconos = {
@@ -112,6 +125,10 @@ const MapaParqueadero = {
             this.cambiarEstadoPuesto();
         });
 
+        document.getElementById('btnRotarPuesto')?.addEventListener('click', () => {
+            this.rotarPuesto();
+        });
+
         document.getElementById('btnConvertirPuesto')?.addEventListener('click', () => {
             this.convertirPuesto();
         });
@@ -119,6 +136,270 @@ const MapaParqueadero = {
         document.getElementById('btnEliminarPuesto')?.addEventListener('click', () => {
             this.eliminarPuesto();
         });
+
+        // Controles de tamaño del mapa (separado por ancho y alto)
+        const btnAumentarWidth = document.getElementById('btnAumentarWidth');
+        const btnReducirWidth = document.getElementById('btnReducirWidth');
+        const btnAumentarHeight = document.getElementById('btnAumentarHeight');
+        const btnReducirHeight = document.getElementById('btnReducirHeight');
+        const btnGuardarTamano = document.getElementById('btnGuardarTamano');
+
+        btnAumentarWidth?.addEventListener('click', () => {
+            this.cambiarAncho(100);
+        });
+        btnReducirWidth?.addEventListener('click', () => {
+            this.cambiarAncho(-100);
+        });
+        btnAumentarHeight?.addEventListener('click', () => {
+            this.cambiarAlto(50);
+        });
+        btnReducirHeight?.addEventListener('click', () => {
+            this.cambiarAlto(-50);
+        });
+
+        btnGuardarTamano?.addEventListener('click', () => {
+            this.guardarTamanioMapa();
+        });
+    },
+
+    /**
+     * Aplicar tamaño del mapa en pixeles
+     */
+    aplicarTamanioMapa(width, height) {
+        const container = document.querySelector('.mapa-container');
+        const canvas = document.getElementById('mapaCanvas');
+        if (!container || !canvas) return;
+
+        // Ajustar ancho y alto explícitamente
+        container.style.maxWidth = width + 'px';
+        container.style.width = width + 'px';
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+
+        // Only scale the visual sizes of puestos; do NOT change their left/top positions automatically.
+        const puestos = document.querySelectorAll('.puesto');
+        const scaleX = width / (this.BASE_WIDTH || 1200);
+        const scaleY = height / (this.BASE_HEIGHT || 600);
+        const scale = Math.min(scaleX, scaleY);
+
+        puestos.forEach(puesto => {
+            const tipo = puesto.dataset.tipo;
+            let baseW = 100;
+            let baseH = 50;
+            if (tipo === '1') baseW = 50;
+            if (tipo === '2') baseW = 100;
+            if (tipo === '3') baseW = 150;
+
+            puesto.style.width = Math.round(baseW * scale) + 'px';
+            puesto.style.height = Math.round(baseH * scale) + 'px';
+            // do not change left/top - user will move manually if needed
+        });
+
+        // Actualizar etiqueta
+        const label = document.getElementById('mapSizeLabel');
+        if (label) label.textContent = `${width} x ${height}`;
+
+        // Mostrar botón de guardar tamaño si cambió respecto a la configuración
+        const cfg = window.mapSettings || { width: 1200, height: 600 };
+        const saveBtn = document.getElementById('btnGuardarTamano');
+        if (saveBtn) {
+            if (parseInt(width) !== parseInt(cfg.width) || parseInt(height) !== parseInt(cfg.height)) {
+                saveBtn.style.display = 'inline-flex';
+            } else {
+                saveBtn.style.display = 'none';
+            }
+        }
+    },
+
+    /**
+     * Resolver colisiones simples moviendo puestos a la derecha/abajo en pasos
+     */
+    resolverColisiones(width, height) {
+        const puestos = Array.from(document.querySelectorAll('.puesto'));
+
+        const step = 10; // grid resolution (same as snap used elsewhere)
+        const cols = Math.max(1, Math.floor(width / step));
+        const rows = Math.max(1, Math.floor(height / step));
+
+        // Build occupancy grid
+        const grid = new Array(rows);
+        for (let r = 0; r < rows; r++) grid[r] = new Array(cols).fill(false);
+
+        const markOccupied = (g, el, mark = true) => {
+            const x = parseInt(el.style.left) || 0;
+            const y = parseInt(el.style.top) || 0;
+            const wCells = Math.ceil(el.offsetWidth / step);
+            const hCells = Math.ceil(el.offsetHeight / step);
+            const cx = Math.floor(x / step);
+            const cy = Math.floor(y / step);
+            for (let ry = cy; ry < cy + hCells; ry++) {
+                for (let rx = cx; rx < cx + wCells; rx++) {
+                    if (ry >= 0 && ry < rows && rx >= 0 && rx < cols) g[ry][rx] = mark;
+                }
+            }
+        };
+
+        // Initial mark
+        puestos.forEach(p => markOccupied(grid, p, true));
+
+        const fitsAt = (g, el, cx, cy) => {
+            const wCells = Math.ceil(el.offsetWidth / step);
+            const hCells = Math.ceil(el.offsetHeight / step);
+            if (cx < 0 || cy < 0 || cx + wCells > cols || cy + hCells > rows) return false;
+            for (let ry = cy; ry < cy + hCells; ry++) {
+                for (let rx = cx; rx < cx + wCells; rx++) {
+                    if (g[ry][rx]) return false;
+                }
+            }
+            return true;
+        };
+
+        const bfsFind = (el) => {
+            const origX = parseInt(el.style.left) || 0;
+            const origY = parseInt(el.style.top) || 0;
+            const startCx = Math.max(0, Math.floor(origX / step));
+            const startCy = Math.max(0, Math.floor(origY / step));
+
+            // Temporarily clear current element cells so it can move into nearby area
+            markOccupied(grid, el, false);
+
+            const visited = Array.from({ length: rows }, () => new Array(cols).fill(false));
+            const q = [];
+            q.push({ cx: startCx, cy: startCy });
+            visited[startCy][startCx] = true;
+
+            const dirs = [ [0,1], [1,0], [-1,0], [0,-1] ]; // prefer down, right, left, up
+
+            while (q.length) {
+                const cur = q.shift();
+                if (fitsAt(grid, el, cur.cx, cur.cy)) {
+                    // Found
+                    return { x: cur.cx * step, y: cur.cy * step };
+                }
+
+                for (let d of dirs) {
+                    const nx = cur.cx + d[0];
+                    const ny = cur.cy + d[1];
+                    if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+                    if (visited[ny][nx]) continue;
+                    visited[ny][nx] = true;
+                    q.push({ cx: nx, cy: ny });
+                }
+            }
+
+            // restore (in case caller expects grid unchanged)
+            markOccupied(grid, el, true);
+            return null;
+        };
+
+        let movedAny = false;
+        // Iterate and fix overlaps
+        for (let el of puestos) {
+            const x = parseInt(el.style.left) || 0;
+            const y = parseInt(el.style.top) || 0;
+            const rectEl = { left: x, top: y, right: x + el.offsetWidth, bottom: y + el.offsetHeight };
+
+            // check overlap
+            let overlap = false;
+            for (let other of puestos) {
+                if (other === el) continue;
+                const ox = parseInt(other.style.left) || 0;
+                const oy = parseInt(other.style.top) || 0;
+                const rectO = { left: ox, top: oy, right: ox + other.offsetWidth, bottom: oy + other.offsetHeight };
+                if (this.rectanglesIntersect(rectEl, rectO)) { overlap = true; break; }
+            }
+
+            if (overlap) {
+                const pos = bfsFind(el);
+                if (pos) {
+                    // unmark old, set new, mark new
+                    markOccupied(grid, el, false);
+                    el.style.left = pos.x + 'px';
+                    el.style.top = pos.y + 'px';
+                    markOccupied(grid, el, true);
+                    window.MapaParqueadero.registrarCambio(el.dataset.id);
+                    movedAny = true;
+                }
+            }
+        }
+
+        // one extra pass if movedAny
+        if (movedAny) {
+            for (let el of puestos) {
+                const x = parseInt(el.style.left) || 0;
+                const y = parseInt(el.style.top) || 0;
+                const rectEl = { left: x, top: y, right: x + el.offsetWidth, bottom: y + el.offsetHeight };
+                for (let other of puestos) {
+                    if (other === el) continue;
+                    const ox = parseInt(other.style.left) || 0;
+                    const oy = parseInt(other.style.top) || 0;
+                    const rectO = { left: ox, top: oy, right: ox + other.offsetWidth, bottom: oy + other.offsetHeight };
+                    if (this.rectanglesIntersect(rectEl, rectO)) {
+                        const pos = bfsFind(el);
+                        if (pos) {
+                            markOccupied(grid, el, false);
+                            el.style.left = pos.x + 'px';
+                            el.style.top = pos.y + 'px';
+                            markOccupied(grid, el, true);
+                            window.MapaParqueadero.registrarCambio(el.dataset.id);
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    /**
+     * Cambiar tamaño relativo del mapa (dx, dy)
+     */
+    cambiarAncho(dW = 100) {
+        const cfg = window.mapSettings || { width: 1200, height: 600 };
+        let newW = Math.max(600, parseInt(cfg.width) + dW);
+        // Límite superior razonable
+        newW = Math.min(5000, newW);
+        const newH = parseInt(cfg.height) || 600;
+
+        this.aplicarTamanioMapa(newW, newH);
+        window.mapSettings = { width: newW, height: newH };
+    },
+
+    cambiarAlto(dH = 50) {
+        const cfg = window.mapSettings || { width: 1200, height: 600 };
+        let newH = Math.max(300, parseInt(cfg.height) + dH);
+        newH = Math.min(3000, newH);
+        const newW = parseInt(cfg.width) || 1200;
+
+        this.aplicarTamanioMapa(newW, newH);
+        window.mapSettings = { width: newW, height: newH };
+    },
+
+    /**
+     * Guardar tamaño del mapa en la base de datos
+     */
+    async guardarTamanioMapa() {
+        const cfg = window.mapSettings || { width: 1200, height: 600 };
+        try {
+            const formData = new FormData();
+            formData.append('map_width', parseInt(cfg.width));
+            formData.append('map_height', parseInt(cfg.height));
+            formData.append('csrf_token', document.querySelector('input[name="csrf_token"]')?.value || '');
+
+            const response = await window.parkingSystem.fetchWithCSRF('../api/guardar_mapa.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.success) {
+                window.parkingSystem.showAlert('Tamaño del mapa guardado correctamente', 'success');
+                // Hide save button
+                document.getElementById('btnGuardarTamano').style.display = 'none';
+            } else {
+                window.parkingSystem.showAlert(response.error || 'Error al guardar tamaño del mapa', 'error');
+            }
+        } catch (error) {
+            console.error('Error guardando tamaño del mapa:', error);
+            window.parkingSystem.showAlert('Error al comunicarse con el servidor', 'error');
+        }
     },
 
     /**
@@ -298,6 +579,59 @@ const MapaParqueadero = {
             }
         } catch (error) {
             console.error('Error:', error);
+            window.parkingSystem.showAlert('Error al comunicarse con el servidor', 'error');
+        }
+    },
+
+    /**
+     * Rotar puesto 90 grados
+     */
+    async rotarPuesto() {
+        const puesto = this.puestoSeleccionado;
+        const elemento = document.querySelector(`.puesto[data-id="${puesto.id}"]`);
+        
+        if (!elemento) return;
+
+        // Toggle orientación (0 <-> 90)
+        const orientacionActual = parseInt(elemento.dataset.orientacion) || 0;
+        const nuevaOrientacion = orientacionActual === 0 ? 90 : 0;
+
+        // Toggle clase de rotación visual
+        if (nuevaOrientacion === 90) {
+            elemento.classList.add('rotado-90');
+        } else {
+            elemento.classList.remove('rotado-90');
+        }
+
+        elemento.dataset.orientacion = nuevaOrientacion;
+
+        try {
+            const formData = new FormData();
+            formData.append('puesto_id', puesto.id);
+            formData.append('orientacion', nuevaOrientacion);
+            formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+
+            const response = await window.parkingSystem.fetchWithCSRF('../api/guardar_mapa.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.success) {
+                window.parkingSystem.showAlert('Puesto rotado correctamente', 'success');
+                // Actualizar localmente sin recargar
+                this.registrarCambio(puesto.id);
+                window.parkingSystem.closeModal('modalAccionesPuesto');
+            } else {
+                // Revertir rotación local si falla
+                elemento.classList.toggle('rotado-90');
+                elemento.dataset.orientacion = orientacionActual;
+                window.parkingSystem.showAlert(response.error || 'Error al rotar puesto', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            // Revertir rotación local
+            elemento.classList.toggle('rotado-90');
+            elemento.dataset.orientacion = orientacionActual;
             window.parkingSystem.showAlert('Error al comunicarse con el servidor', 'error');
         }
     },

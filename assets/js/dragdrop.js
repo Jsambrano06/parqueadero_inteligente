@@ -115,10 +115,17 @@ const DragDropManager = {
         let newX = e.clientX - canvasRect.left - this.offsetX;
         let newY = e.clientY - canvasRect.top - this.offsetY;
 
-        // Validar límites del canvas
-        const puestoRect = this.elementoArrastrado.getBoundingClientRect();
-        const maxX = canvasRect.width - puestoRect.width;
-        const maxY = canvasRect.height - puestoRect.height;
+        // Obtener el canvas del mapa para respetar límites dinámicos
+        const mapCanvas = document.getElementById('mapaCanvas');
+        const mapWidth = parseInt(mapCanvas.style.width) || mapCanvas.offsetWidth;
+        const mapHeight = parseInt(mapCanvas.style.height) || mapCanvas.offsetHeight;
+        
+        // Validar límites del canvas usando tamaño real
+        const puestoWidth = parseInt(this.elementoArrastrado.style.width) || this.elementoArrastrado.offsetWidth;
+        const puestoHeight = parseInt(this.elementoArrastrado.style.height) || this.elementoArrastrado.offsetHeight;
+        
+        const maxX = Math.max(0, mapWidth - puestoWidth);
+        const maxY = Math.max(0, mapHeight - puestoHeight);
 
         newX = Math.max(0, Math.min(newX, maxX));
         newY = Math.max(0, Math.min(newY, maxY));
@@ -127,13 +134,7 @@ const DragDropManager = {
         newX = Math.round(newX / 10) * 10;
         newY = Math.round(newY / 10) * 10;
 
-        // Verificar superposición
-        if (this.verificarSuperposicion(this.elementoArrastrado, newX, newY)) {
-            window.parkingSystem.showAlert('No se puede colocar ahí, hay superposición con otro puesto', 'error');
-            return;
-        }
-
-        // Aplicar nueva posición
+        // Aplicar nueva posición sin validación restrictiva de superposición
         this.elementoArrastrado.style.left = newX + 'px';
         this.elementoArrastrado.style.top = newY + 'px';
 
@@ -181,10 +182,14 @@ const DragDropManager = {
         let newX = touch.clientX - canvasRect.left - this.offsetX;
         let newY = touch.clientY - canvasRect.top - this.offsetY;
 
-        // Limitar al canvas
-        const puestoRect = this.elementoArrastrado.getBoundingClientRect();
-        const maxX = canvasRect.width - puestoRect.width;
-        const maxY = canvasRect.height - puestoRect.height;
+        // Obtener tamaño real del mapa
+        const mapWidth = parseInt(canvas.style.width) || canvas.offsetWidth;
+        const mapHeight = parseInt(canvas.style.height) || canvas.offsetHeight;
+        const puestoWidth = parseInt(this.elementoArrastrado.style.width) || this.elementoArrastrado.offsetWidth;
+        const puestoHeight = parseInt(this.elementoArrastrado.style.height) || this.elementoArrastrado.offsetHeight;
+
+        const maxX = Math.max(0, mapWidth - puestoWidth);
+        const maxY = Math.max(0, mapHeight - puestoHeight);
 
         newX = Math.max(0, Math.min(newX, maxX));
         newY = Math.max(0, Math.min(newY, maxY));
@@ -207,18 +212,12 @@ const DragDropManager = {
         x = Math.round(x / 10) * 10;
         y = Math.round(y / 10) * 10;
 
-        // Verificar superposición
-        if (this.verificarSuperposicion(this.elementoArrastrado, x, y)) {
-            window.parkingSystem.showAlert('No se puede colocar ahí, hay superposición con otro puesto', 'error');
-            // Revertir posición (necesitaríamos guardar posición original)
-        } else {
-            this.elementoArrastrado.style.left = x + 'px';
-            this.elementoArrastrado.style.top = y + 'px';
+        this.elementoArrastrado.style.left = x + 'px';
+        this.elementoArrastrado.style.top = y + 'px';
 
-            // Registrar cambio
-            const puestoId = this.elementoArrastrado.dataset.id;
-            window.MapaParqueadero.registrarCambio(puestoId);
-        }
+        // Registrar cambio
+        const puestoId = this.elementoArrastrado.dataset.id;
+        window.MapaParqueadero.registrarCambio(puestoId);
 
         this.elementoArrastrado.classList.remove('dragging');
         this.elementoArrastrado = null;

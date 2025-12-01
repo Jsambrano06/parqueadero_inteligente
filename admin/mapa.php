@@ -148,6 +148,31 @@ $mensajes = obtenerMensajes();
                             <button id="btnGuardarCambios" class="btn btn-success" style="display: none;">
                                 <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
                             </button>
+                            <!-- Controles de tamaño del mapa -->
+                            <div class="mapa-size-controls" style="display: inline-flex; gap:8px; align-items:center; margin-left:8px;">
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    <small style="color:#475569;">Ancho</small>
+                                    <button id="btnReducirWidth" class="btn btn-secondary" title="Reducir ancho">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <button id="btnAumentarWidth" class="btn btn-secondary" title="Aumentar ancho">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    <small style="color:#475569;">Alto</small>
+                                    <button id="btnReducirHeight" class="btn btn-secondary" title="Reducir alto">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <button id="btnAumentarHeight" class="btn btn-secondary" title="Aumentar alto">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div id="mapSizeLabel" style="font-size:13px; color:#334155;">-- x --</div>
+                                <button id="btnGuardarTamano" class="btn btn-primary" title="Guardar tamaño del mapa" style="display:none;">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -244,6 +269,9 @@ $mensajes = obtenerMensajes();
                     <button id="btnCambiarEstado" class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-toggle-on"></i> Cambiar Estado
                     </button>
+                    <button id="btnRotarPuesto" class="btn btn-info btn-block">
+                        <i class="fa-solid fa-rotate-right"></i> Rotar 90°
+                    </button>
                     <button id="btnConvertirPuesto" class="btn btn-primary btn-block">
                         <i class="fa-solid fa-arrows-rotate"></i> Convertir Tipo
                     </button>
@@ -264,6 +292,11 @@ $mensajes = obtenerMensajes();
         // Pasar datos PHP a JavaScript
         window.puestosData = <?php echo json_encode($puestos); ?>;
         window.tiposPuesto = <?php echo json_encode($tipos_puesto); ?>;
+        // Tamaño del mapa (se puede modificar desde la interfaz)
+        window.mapSettings = {
+            width: <?php echo (int)(obtenerConfiguracion('map_width') ?: 1200); ?>,
+            height: <?php echo (int)(obtenerConfiguracion('map_height') ?: 600); ?>
+        };
     </script>
     <script src="../assets/js/global.js"></script>
     <script src="../assets/js/mapa.js"></script>
