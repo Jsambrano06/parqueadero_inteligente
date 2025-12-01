@@ -118,14 +118,24 @@
 }
 
 /* Rotación de puestos */
+
+/* Ajustar contenido para puestos rotados */
 .puesto.rotado-90 {
-    transform-origin: center center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
-.puesto.rotado-90 {
-    /* Intercambiar ancho y alto visualmente */
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
+.puesto.rotado-90 i {
+    font-size: 16px;
+    margin-bottom: 0;
+}
+
+.puesto.rotado-90 .puesto-codigo {
+    font-size: 10px;
+    writing-mode: horizontal-tb;
 }
 
 /* Iconos de vehículos */

@@ -134,11 +134,11 @@ const DragDropManager = {
         newX = Math.round(newX / 10) * 10;
         newY = Math.round(newY / 10) * 10;
 
-        // Aplicar nueva posición sin validación restrictiva de superposición
+        // Aplicar nueva posición
         this.elementoArrastrado.style.left = newX + 'px';
         this.elementoArrastrado.style.top = newY + 'px';
 
-        // Registrar cambio
+        // IMPORTANTE: Registrar cambio para guardar
         const puestoId = this.elementoArrastrado.dataset.id;
         window.MapaParqueadero.registrarCambio(puestoId);
 

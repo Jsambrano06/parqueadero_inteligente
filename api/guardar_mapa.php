@@ -70,14 +70,14 @@ try {
         }
 
         // Verificar que el puesto existe
-        $sql = "SELECT id, codigo FROM puestos WHERE id = ?";
+        $sql = "SELECT id, codigo, orientacion FROM puestos WHERE id = ?";
         $puesto = obtenerFila($sql, [$puesto_id]);
 
         if (!$puesto) {
             throw new Exception('Puesto no encontrado');
         }
 
-        // Actualizar orientación
+        // Actualizar orientación en la base de datos
         $sql = "UPDATE puestos SET orientacion = ? WHERE id = ?";
         ejecutarConsulta($sql, [$orientacion, $puesto_id]);
 
