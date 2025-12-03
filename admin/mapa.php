@@ -48,6 +48,8 @@ $mensajes = obtenerMensajes();
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <link rel="stylesheet" href="../assets/css/mapa.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../assets/js/tutorial.js"></script>
+    <script src="../assets/js/tutorials.js"></script>
 </head>
 <body>
     <div class="layout-wrapper">
@@ -85,6 +87,9 @@ $mensajes = obtenerMensajes();
             </nav>
 
             <div class="sidebar-footer">
+                <button onclick="startTutorial()" class="nav-item" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
+                    <i class="fa-solid fa-graduation-cap"></i> Tutorial
+                </button>
                 <a href="../public/logout.php" class="nav-item">
                     <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
                 </a>
@@ -151,7 +156,7 @@ $mensajes = obtenerMensajes();
                             <!-- Controles de tamaño del mapa -->
                             <div class="mapa-size-controls" style="display: inline-flex; gap:8px; align-items:center; margin-left:8px;">
                                 <div style="display:flex; gap:6px; align-items:center;">
-                                    <small style="color:#475569;">Ancho</small>
+                                    <small style="color:var(--text-muted, #475569);">Ancho</small>
                                     <button id="btnReducirWidth" class="btn btn-secondary" title="Reducir ancho">
                                         <i class="fa-solid fa-minus"></i>
                                     </button>
@@ -160,7 +165,7 @@ $mensajes = obtenerMensajes();
                                     </button>
                                 </div>
                                 <div style="display:flex; gap:6px; align-items:center;">
-                                    <small style="color:#475569;">Alto</small>
+                                    <small style="color:var(--text-muted, #475569);">Alto</small>
                                     <button id="btnReducirHeight" class="btn btn-secondary" title="Reducir alto">
                                         <i class="fa-solid fa-minus"></i>
                                     </button>
@@ -168,7 +173,7 @@ $mensajes = obtenerMensajes();
                                         <i class="fa-solid fa-plus"></i>
                                     </button>
                                 </div>
-                                <div id="mapSizeLabel" style="font-size:13px; color:#334155;">-- x --</div>
+                                <div id="mapSizeLabel" style="font-size:13px; color:var(--text-color, #334155);">-- x --</div>
                                 <button id="btnGuardarTamano" class="btn btn-primary" title="Guardar tamaño del mapa" style="display:none;">
                                     <i class="fa-solid fa-floppy-disk"></i>
                                 </button>
@@ -262,9 +267,11 @@ $mensajes = obtenerMensajes();
                 </button>
             </div>
             <div class="modal-body">
-                <div id="puestoInfoModal" style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 6px;">
+                <div id="puestoInfoModal" style="margin-bottom: 20px; padding: 12px; background: var(--surface-color, #f8fafc); border-radius: 6px; color: var(--text-color);">
                     <!-- Info del puesto -->
                 </div>
+                        <!-- Info del puesto -->
+                    </div>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <button id="btnCambiarEstado" class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-toggle-on"></i> Cambiar Estado

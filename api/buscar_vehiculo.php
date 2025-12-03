@@ -37,6 +37,14 @@ try {
         throw new Exception('No se encontró ningún vehículo activo con esa placa o puesto');
     }
     
+    // Añadir hora de entrada en formato ISO con zona para parseo correcto en frontend
+    try {
+        $dt = new DateTime($vehiculo['hora_entrada']);
+        $vehiculo['hora_entrada_iso'] = $dt->format(DATE_ATOM);
+    } catch (Exception $e) {
+        $vehiculo['hora_entrada_iso'] = $vehiculo['hora_entrada'];
+    }
+    
     echo json_encode([
         'success' => true,
         'vehiculo' => $vehiculo

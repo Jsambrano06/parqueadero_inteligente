@@ -33,6 +33,8 @@ $mensajes = obtenerMensajes();
     <title>Registro de Salida - <?php echo htmlspecialchars($nombre_parqueadero); ?></title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../assets/js/tutorial.js"></script>
+    <script src="../assets/js/tutorials.js"></script>
 </head>
 <body>
     <div class="layout-wrapper">
@@ -58,6 +60,15 @@ $mensajes = obtenerMensajes();
             </nav>
 
             <div class="sidebar-footer">
+                <button onclick="startTutorial()" class="nav-item" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
+                    <i class="fa-solid fa-graduation-cap"></i> Tutorial
+                </button>
+                <button onclick="window.parkingSystem.toggleAccessible()" class="nav-item" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
+                    <i class="fa-solid fa-universal-access"></i> Modo Accesible
+                </button>
+                <button onclick="window.parkingSystem.toggleTheme()" class="nav-item" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
+                    <i class="fa-solid fa-circle-half-stroke"></i> Tema (claro/oscuro/auto)
+                </button>
                 <a href="../public/logout.php" class="nav-item">
                     <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
                 </a>
@@ -100,16 +111,16 @@ $mensajes = obtenerMensajes();
                     <div class="card-body">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                             <?php foreach ($tarifas as $tarifa): ?>
-                            <div style="padding: 16px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center;">
+                            <div style="padding: 16px; border: 2px solid var(--border-color); border-radius: 8px; text-align: center;">
                                 <?php 
                                 $icono = $tarifa['tipo_vehiculo'] == 'moto' ? 'motorcycle' : 
                                         ($tarifa['tipo_vehiculo'] == 'carro' ? 'car' : 'truck');
                                 ?>
-                                <i class="fa-solid fa-<?php echo $icono; ?>" style="font-size: 32px; color: #3b82f6; margin-bottom: 8px;"></i>
+                                <i class="fa-solid fa-<?php echo $icono; ?> text-primary" style="font-size: 32px; margin-bottom: 8px;"></i>
                                 <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">
                                     <?php echo ucfirst($tarifa['tipo_vehiculo']); ?>
                                 </div>
-                                <div style="font-size: 20px; color: #10b981; font-weight: 700;">
+                                <div class="text-success" style="font-size: 20px; font-weight: 700;">
                                     <?php echo formatearMoneda($tarifa['precio_hora']); ?>/hora
                                 </div>
                             </div>
@@ -133,6 +144,7 @@ $mensajes = obtenerMensajes();
                     </div>
                     <div class="card-body">
                         <form id="formBuscarVehiculo">
+                            <?php echo campoCSRF(); ?>
                             <div class="form-group">
                                 <label class="form-label" for="buscarPlaca">
                                     Buscar por Placa o Puesto

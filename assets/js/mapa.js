@@ -69,16 +69,22 @@ const MapaParqueadero = {
         // Aplicar rotación si existe
         const rotacion = parseInt(puesto.orientacion) || 0;
         console.log(`Puesto ${puesto.codigo}: orientacion=${rotacion}`);
-        
+
+        // Aplicar tamaño inicial escalado según la configuración actual del mapa
+        const cfg = window.mapSettings || { width: 1200, height: 600 };
+        const scaleX = (cfg.width || 1200) / (this.BASE_WIDTH || 1200);
+        const scaleY = (cfg.height || 600) / (this.BASE_HEIGHT || 600);
+        const scale = Math.min(scaleX, scaleY);
+
         if (rotacion === 90) {
             div.classList.add('rotado-90');
-            // Intercambiar dimensiones para rotación vertical
-            div.style.width = baseHeight + 'px';
-            div.style.height = baseWidth + 'px';
+            // Intercambiar dimensiones para rotación horizontal visual
+            div.style.width = Math.round(baseHeight * scale) + 'px';
+            div.style.height = Math.round(baseWidth * scale) + 'px';
         } else {
-            // Dimensiones normales (horizontal)
-            div.style.width = baseWidth + 'px';
-            div.style.height = baseHeight + 'px';
+            // Dimensiones normales (vertical visual)
+            div.style.width = Math.round(baseWidth * scale) + 'px';
+            div.style.height = Math.round(baseHeight * scale) + 'px';
         }
 
         // Icono según tipo
@@ -216,8 +222,17 @@ const MapaParqueadero = {
             if (tipo === '2') baseW = 100;
             if (tipo === '3') baseW = 150;
 
-            puesto.style.width = Math.round(baseW * scale) + 'px';
-            puesto.style.height = Math.round(baseH * scale) + 'px';
+            const orient = parseInt(puesto.dataset.orientacion) || 0;
+            if (orient === 90) {
+                // Si el puesto está rotado, invertir ancho/alto cuando aplicamos escala
+                puesto.style.width = Math.round(baseH * scale) + 'px';
+                puesto.style.height = Math.round(baseW * scale) + 'px';
+                puesto.classList.add('rotado-90');
+            } else {
+                puesto.style.width = Math.round(baseW * scale) + 'px';
+                puesto.style.height = Math.round(baseH * scale) + 'px';
+                puesto.classList.remove('rotado-90');
+            }
         });
 
         const label = document.getElementById('mapSizeLabel');
@@ -232,6 +247,55 @@ const MapaParqueadero = {
                 saveBtn.style.display = 'none';
             }
         }
+
+        // Asegurar que la orientación visual de cada puesto coincide con su dato (0 o 90)
+        this.ajustarOrientacionesVisuales(width, height);
+    },
+
+    /**
+     * Forzar la apariencia correcta de los puestos según su `data-orientacion`.
+     * Esto asegura que los rectángulos (ancho/alto) se intercambien cuando la orientación es 90°.
+     */
+    ajustarOrientacionesVisuales(width, height) {
+        const puestos = document.querySelectorAll('.puesto');
+        const scaleX = width / (this.BASE_WIDTH || 1200);
+        const scaleY = height / (this.BASE_HEIGHT || 600);
+        const scale = Math.min(scaleX, scaleY);
+
+        puestos.forEach(puesto => {
+            const tipo = puesto.dataset.tipo;
+            let baseW = 100;
+            let baseH = 50;
+            if (tipo === '1') baseW = 50;
+            if (tipo === '2') baseW = 100;
+            if (tipo === '3') baseW = 150;
+
+            const orient = parseInt(puesto.dataset.orientacion) || 0;
+            if (orient === 90) {
+                puesto.style.width = Math.round(baseH * scale) + 'px';
+                puesto.style.height = Math.round(baseW * scale) + 'px';
+                puesto.classList.add('rotado-90');
+            } else {
+                puesto.style.width = Math.round(baseW * scale) + 'px';
+                puesto.style.height = Math.round(baseH * scale) + 'px';
+                puesto.classList.remove('rotado-90');
+            }
+            // Debug: log estado visual de cada puesto para ayudar a diagnosticar
+            try {
+                const comp = window.getComputedStyle(puesto);
+                console.debug('Puesto visual:', {
+                    id: puesto.dataset.id,
+                    orient: puesto.dataset.orientacion,
+                    classList: puesto.className,
+                    inlineWidth: puesto.style.width,
+                    inlineHeight: puesto.style.height,
+                    computedWidth: comp.width,
+                    computedHeight: comp.height
+                });
+            } catch (e) {
+                // ignore
+            }
+        });
     },
 
     cambiarAncho(dW = 100) {

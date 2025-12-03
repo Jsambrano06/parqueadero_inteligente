@@ -24,7 +24,17 @@ try {
             ORDER BY m.hora_entrada DESC";
     
     $vehiculos = obtenerFilas($sql);
-    
+
+    // Añadir campo ISO para hora de entrada en cada registro
+    foreach ($vehiculos as &$v) {
+        try {
+            $dt = new DateTime($v['hora_entrada']);
+            $v['hora_entrada_iso'] = $dt->format(DATE_ATOM);
+        } catch (Exception $e) {
+            $v['hora_entrada_iso'] = $v['hora_entrada'];
+        }
+    }
+
     echo json_encode([
         'success' => true,
         'vehiculos' => $vehiculos,

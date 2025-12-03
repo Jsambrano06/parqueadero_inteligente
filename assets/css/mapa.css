@@ -7,14 +7,28 @@
 /* Contenedor del mapa */
 .mapa-container {
     position: relative;
-    background-color: #f8fafc;
-    border: 2px solid #e2e8f0;
+    background-color: var(--bg-color, #f8fafc);
+    border: 2px solid var(--border-color, #e2e8f0);
     border-radius: 8px;
     min-height: 500px;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     overflow: visible;
+    /* Semantic color variables for mapa (fall back to global theme vars) */
+    --map-warn-bg: rgba(245, 158, 11, 0.12);
+    --map-warn-text: #92400e;
+    --map-success-bg: rgba(16, 185, 129, 0.12);
+    --map-success-border: var(--color-exito, #10b981);
+    --map-success-text: #065f46;
+    --map-danger-bg: rgba(239, 68, 68, 0.08);
+    --map-danger-border: var(--color-peligro, #ef4444);
+    --map-danger-text: #991b1b;
+    --map-muted-bg: var(--surface-color, #e2e8f0);
+    --map-muted-border: var(--border-color, #94a3b8);
+    --map-muted-text: var(--text-muted, #475569);
+    --map-tooltip-bg: rgba(30, 41, 59, 0.95);
+    --map-tooltip-text: var(--color-blanco, #ffffff);
 }
 
 .mapa-canvas {
@@ -22,10 +36,17 @@
     width: 100%;
     height: 600px;
     background-image: 
-        linear-gradient(rgba(226, 232, 240, 0.5) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(226, 232, 240, 0.5) 1px, transparent 1px);
+        linear-gradient(rgba(240, 244, 249, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(240, 244, 249, 0.1) 1px, transparent 1px);
     background-size: 20px 20px;
     overflow: hidden;
+    background-color: var(--surface-color, #f8fafc);
+}
+
+html.dark-theme .mapa-canvas {
+    background-image: 
+        linear-gradient(rgba(240, 244, 249, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(240, 244, 249, 0.05) 1px, transparent 1px);
 }
 
 /* Controles del mapa */
@@ -34,10 +55,11 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px;
-    background-color: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
+    background-color: var(--surface-color, #ffffff);
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
     flex-wrap: wrap;
     gap: 12px;
+    color: var(--text-color);
 }
 
 .mapa-controls-left,
@@ -52,11 +74,16 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background-color: #fef3c7;
-    color: #92400e;
+    background-color: var(--map-warn-bg);
+    color: var(--map-warn-text);
     border-radius: 6px;
     font-size: 13px;
     font-weight: 500;
+}
+
+html.dark-theme .modo-edicion-badge {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
 }
 
 .modo-edicion-badge i {
@@ -83,21 +110,21 @@
 
 /* Estados de puestos */
 .puesto.libre {
-    background-color: #d1fae5;
-    border-color: #10b981;
-    color: #065f46;
+    background-color: var(--map-success-bg);
+    border-color: var(--map-success-border);
+    color: var(--map-success-text);
 }
 
 .puesto.ocupado {
-    background-color: #fee2e2;
-    border-color: #ef4444;
-    color: #991b1b;
+    background-color: var(--map-danger-bg);
+    border-color: var(--map-danger-border);
+    color: var(--map-danger-text);
 }
 
 .puesto.inactivo {
-    background-color: #e2e8f0;
-    border-color: #94a3b8;
-    color: #475569;
+    background-color: var(--map-muted-bg);
+    border-color: var(--map-muted-border);
+    color: var(--map-muted-text);
     opacity: 0.7;
 }
 
@@ -122,7 +149,6 @@
 /* Ajustar contenido para puestos rotados */
 .puesto.rotado-90 {
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 4px;
@@ -163,8 +189,8 @@
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #1e293b;
-    color: #ffffff;
+    background-color: var(--map-tooltip-bg);
+    color: var(--map-tooltip-text);
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 12px;
@@ -183,7 +209,7 @@
     left: 50%;
     transform: translateX(-50%);
     border: 6px solid transparent;
-    border-top-color: #1e293b;
+    border-top-color: var(--map-tooltip-bg);
 }
 
 .puesto:hover .puesto-info {
@@ -195,9 +221,10 @@
     display: flex;
     gap: 24px;
     padding: 16px;
-    background-color: #ffffff;
-    border-top: 1px solid #e2e8f0;
+    background-color: var(--surface-color, #ffffff);
+    border-top: 1px solid var(--border-color, #e2e8f0);
     flex-wrap: wrap;
+    color: var(--text-color);
 }
 
 .leyenda-item {
@@ -205,6 +232,7 @@
     align-items: center;
     gap: 8px;
     font-size: 13px;
+    color: var(--text-color);
 }
 
 .leyenda-color {
@@ -215,18 +243,18 @@
 }
 
 .leyenda-color.libre {
-    background-color: #d1fae5;
-    border-color: #10b981;
+    background-color: var(--map-success-bg);
+    border-color: var(--map-success-border);
 }
 
 .leyenda-color.ocupado {
-    background-color: #fee2e2;
-    border-color: #ef4444;
+    background-color: var(--map-danger-bg);
+    border-color: var(--map-danger-border);
 }
 
 .leyenda-color.inactivo {
-    background-color: #e2e8f0;
-    border-color: #94a3b8;
+    background-color: var(--map-muted-bg);
+    border-color: var(--map-muted-border);
 }
 
 /* Estadísticas rápidas del mapa */
@@ -234,8 +262,8 @@
     display: flex;
     gap: 16px;
     padding: 12px 16px;
-    background-color: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background-color: var(--surface-color, #f8fafc);
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
 }
 
 .mapa-stat {
@@ -244,23 +272,24 @@
     gap: 6px;
     font-size: 13px;
     font-weight: 500;
+    color: var(--text-color);
 }
 
 .mapa-stat i {
     font-size: 16px;
 }
 
-.mapa-stat.libres { color: #10b981; }
-.mapa-stat.ocupados { color: #ef4444; }
-.mapa-stat.total { color: #3b82f6; }
+.mapa-stat.libres { color: var(--color-exito); }
+.mapa-stat.ocupados { color: var(--color-peligro); }
+.mapa-stat.total { color: var(--color-primario); }
 
 /* Panel lateral de acciones */
 .mapa-acciones {
     position: absolute;
     top: 16px;
     right: 16px;
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: var(--surface-color, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
     border-radius: 8px;
     padding: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -268,6 +297,7 @@
     flex-direction: column;
     gap: 8px;
     min-width: 200px;
+    color: var(--text-color);
 }
 
 .mapa-acciones.active {
@@ -278,7 +308,7 @@
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 8px;
-    color: #1e293b;
+    color: var(--text-color);
 }
 
 /* Selector de tipo al agregar puesto */
@@ -291,30 +321,135 @@
 
 .tipo-option {
     padding: 12px 8px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--border-color, #e2e8f0);
     border-radius: 6px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
     font-size: 12px;
+    background-color: var(--surface-color, #ffffff);
+    color: var(--text-color);
 }
 
 .tipo-option:hover {
-    border-color: #3b82f6;
-    background-color: #eff6ff;
+    border-color: #7c3aed;
+    background-color: rgba(124, 58, 237, 0.1);
 }
 
 .tipo-option.selected {
-    border-color: #3b82f6;
-    background-color: #dbeafe;
-    color: #1e40af;
+    border-color: #7c3aed;
+    background-color: rgba(124, 58, 237, 0.2);
+    color: #7c3aed;
     font-weight: 600;
 }
+
+html.dark-theme .tipo-option:hover {
+    border-color: #a78bfa;
+    background-color: rgba(167, 139, 250, 0.1);
+}
+
+html.dark-theme .tipo-option.selected {
+    border-color: #a78bfa;
+    background-color: rgba(167, 139, 250, 0.2);
+    color: #a78bfa;
+}
+
+/* Leyenda - colores más visibles en dark */
+html.dark-theme .mapa-leyenda .leyenda-color.libre {
+    background-color: #065f46 !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 4px 10px rgba(16,185,129,0.12);
+}
+
+html.dark-theme .mapa-leyenda .leyenda-color.ocupado {
+    background-color: #7f1d1d !important;
+    border-color: #ef4444 !important;
+    box-shadow: 0 4px 10px rgba(239,68,68,0.12);
+}
+
+html.dark-theme .mapa-leyenda .leyenda-color.inactivo {
+    background-color: #1f2937 !important;
+    border-color: #94a3b8 !important;
+    box-shadow: 0 4px 10px rgba(148,163,184,0.06);
+}
+
+html.dark-theme .mapa-leyenda .leyenda-item span {
+    color: var(--text-color, #f0f4f9) !important;
+}
+
+/* Puestos: mejorar contraste en dark */
+html.dark-theme .puesto.libre {
+    background: linear-gradient(180deg, #064e3b 0%, #0a553f 100%) !important;
+    border-color: #10b981 !important;
+    color: #e6fff5 !important;
+    box-shadow: 0 6px 18px rgba(16,185,129,0.12) !important;
+}
+
+html.dark-theme .puesto.ocupado {
+    background: linear-gradient(180deg, #5a0f0f 0%, #3f0710 100%) !important;
+    border-color: #ef4444 !important;
+    color: #fff5f5 !important;
+    box-shadow: 0 6px 18px rgba(239,68,68,0.12) !important;
+}
+
+html.dark-theme .puesto.inactivo {
+    background: #0b1220 !important;
+    border-color: #475569 !important;
+    color: #9aa8bf !important;
+    opacity: 0.95 !important;
+}
+
+/* Make legend background and container clearly dark */
+html.dark-theme .mapa-leyenda {
+    background-color: transparent !important;
+}
+
 
 .tipo-option i {
     display: block;
     font-size: 24px;
     margin-bottom: 4px;
+}
+
+/* ========== DARK THEME PARA MAPA ========== */
+html.dark-theme .mapa-container {
+    background-color: #0f1629;
+    border-color: rgba(240, 244, 249, 0.12);
+}
+
+html.dark-theme .mapa-controls {
+    background-color: #0f1629;
+    border-bottom-color: rgba(240, 244, 249, 0.12);
+}
+
+html.dark-theme .mapa-stats {
+    background-color: #0a0f1a;
+    border-bottom-color: rgba(240, 244, 249, 0.12);
+}
+
+html.dark-theme .mapa-leyenda {
+    background-color: #0f1629;
+    border-top-color: rgba(240, 244, 249, 0.12);
+}
+
+html.dark-theme .puesto-info {
+    background-color: rgba(124, 58, 237, 0.9);
+    color: #ffffff;
+}
+
+html.dark-theme .puesto-info::after {
+    border-top-color: rgba(124, 58, 237, 0.9);
+}
+
+html.dark-theme .mapa-acciones {
+    background-color: #0f1629;
+    border-color: rgba(240, 244, 249, 0.12);
+}
+
+html.dark-theme .tipo-option {
+    background-color: #0a0f1a;
+    border-color: rgba(240, 244, 249, 0.12);
+    color: #f0f4f9;
 }
 
 /* Responsive */

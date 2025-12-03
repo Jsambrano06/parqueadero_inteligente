@@ -91,6 +91,8 @@ $mensajes = obtenerMensajes();
     <title>Historial - <?php echo htmlspecialchars($nombre_parqueadero); ?></title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../assets/js/tutorial.js"></script>
+    <script src="../assets/js/tutorials.js"></script>
 </head>
 <body>
     <div class="layout-wrapper">
@@ -116,6 +118,9 @@ $mensajes = obtenerMensajes();
             </nav>
 
             <div class="sidebar-footer">
+                <button onclick="startTutorial()" class="nav-item" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
+                    <i class="fa-solid fa-graduation-cap"></i> Tutorial
+                </button>
                 <a href="../public/logout.php" class="nav-item">
                     <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
                 </a>

@@ -89,8 +89,7 @@ if (isset($_GET['logout'])) {
                 
                 <div class="form-group">
                     <label for="usuario" class="form-label">Usuario</label>
-                    <div class="input-icon">
-                        <i class="fa-solid fa-user"></i>
+                    <div class="input-icon no-icon">
                         <input 
                             type="text" 
                             id="usuario" 
@@ -100,14 +99,14 @@ if (isset($_GET['logout'])) {
                             value="<?php echo isset($_POST['usuario']) ? htmlspecialchars($_POST['usuario']) : ''; ?>"
                             required
                             autofocus
+                            data-no-icon="true"
                         >
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="clave" class="form-label">Contraseña</label>
-                    <div class="input-icon">
-                        <i class="fa-solid fa-lock"></i>
+                    <div class="input-icon no-icon">
                         <input 
                             type="password" 
                             id="clave" 
@@ -115,6 +114,7 @@ if (isset($_GET['logout'])) {
                             class="form-control" 
                             placeholder="Ingresa tu contraseña"
                             required
+                            data-no-icon="true"
                         >
                     </div>
                 </div>

@@ -4,6 +4,28 @@
  * Sistema de Parqueadero Inteligente
  */
 
+// Ensure all text inherits theme colors properly
+(function ensureThemeInheritance() {
+    document.addEventListener('DOMContentLoaded', () => {
+        const updateThemeText = () => {
+            // Ensure all body text inherits theme
+            const html = document.documentElement;
+            if (html.classList.contains('dark-theme')) {
+                document.body.style.color = 'var(--text-color, #f0f4f9)';
+            }
+        };
+        updateThemeText();
+        // Also update when theme changes
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    updateThemeText();
+                }
+            });
+        });
+        observer.observe(document.documentElement, { attributes: true });
+    });
+})();
 // Obtener token CSRF de la página
 function getCSRFToken() {
     const input = document.querySelector('input[name="csrf_token"]');
@@ -397,3 +419,228 @@ window.parkingSystem = {
     validateForm,
     clearForm
 };
+
+/**
+ * Accesibilidad y temas (claro/oscuro/auto)
+ */
+(function() {
+    const ACCESSIBLE_KEY = 'parking_accessible';
+    const THEME_KEY = 'parking_theme'; // 'dark' | 'light' | 'auto'
+
+    function applyAccessible(enabled, silent = false) {
+        const html = document.documentElement;
+        if (enabled) {
+            html.classList.add('accessible-mode');
+            html.setAttribute('data-accessible', 'true');
+            ensureAccessibleHelpers();
+        } else {
+            html.classList.remove('accessible-mode');
+            html.removeAttribute('data-accessible');
+            removeAccessibleHelpers();
+        }
+        if (!silent) showAlert(enabled ? '✓ Modo Accesible Activado - Fuentes grandes, alto contraste y navegación mejorada' : 'Modo accesible desactivado', 'success', 3000);
+    }
+
+    function setAccessible(enabled, persist = true, silent = false) {
+        if (persist) localStorage.setItem(ACCESSIBLE_KEY, enabled ? '1' : '0');
+        applyAccessible(enabled, silent);
+    }
+
+    function toggleAccessible() {
+        const current = localStorage.getItem(ACCESSIBLE_KEY) === '1';
+        if (!current) {
+            // confirmar activación
+            confirmAction('El Modo Accesible aumentará fuentes, contrastes y mejoras de navegación. ¿Deseas activarlo?', () => {
+                setAccessible(true, true, false);
+            });
+        } else {
+            confirmAction('¿Deseas desactivar el Modo Accesible?', () => {
+                setAccessible(false, true, false);
+            });
+        }
+    }
+
+    // Theme handling - apply to <html> element with high specificity
+    function applyTheme(theme) {
+        const html = document.documentElement;
+        html.classList.remove('dark-theme');
+        html.classList.remove('light-theme');
+        html.removeAttribute('data-theme');
+
+        if (theme === 'dark') {
+            html.classList.add('dark-theme');
+            html.setAttribute('data-theme', 'dark');
+        } else if (theme === 'light') {
+            html.classList.add('light-theme');
+            html.setAttribute('data-theme', 'light');
+        } else if (theme === 'auto') {
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                html.classList.add('dark-theme');
+                html.setAttribute('data-theme', 'dark');
+            } else {
+                html.classList.add('light-theme');
+                html.setAttribute('data-theme', 'light');
+            }
+        }
+    }
+
+    function setTheme(theme, persist = true) {
+        if (persist) localStorage.setItem(THEME_KEY, theme);
+        applyTheme(theme);
+        showAlert(`Tema: ${theme}`, 'info', 2000);
+    }
+
+    function toggleTheme() {
+        const current = localStorage.getItem(THEME_KEY) || 'auto';
+        const next = current === 'dark' ? 'light' : (current === 'light' ? 'auto' : 'dark');
+        setTheme(next);
+    }
+
+    // Auto-detect changes in OS/browser preference when in 'auto' mode
+    if (window.matchMedia) {
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        mq.addEventListener && mq.addEventListener('change', (e) => {
+            const mode = localStorage.getItem(THEME_KEY) || 'auto';
+            if (mode === 'auto') applyTheme('auto');
+        });
+    }
+
+    // Inicializar desde localStorage o preferencia (silencioso, sin notificaciones en carga)
+    document.addEventListener('DOMContentLoaded', () => {
+        const a = localStorage.getItem(ACCESSIBLE_KEY) === '1';
+        applyAccessible(a, true);
+
+        const t = localStorage.getItem(THEME_KEY) || 'auto';
+        // Pequeño delay para asegurar que el DOM está listo
+        setTimeout(() => {
+            applyTheme(t);
+        }, 50);
+    });
+
+    // También aplicar en el evento load para garantizar
+    window.addEventListener('load', () => {
+        const t = localStorage.getItem(THEME_KEY) || 'auto';
+        applyTheme(t);
+    });
+
+    // Exportar a parkingSystem
+    window.parkingSystem.setAccessible = setAccessible;
+    window.parkingSystem.toggleAccessible = toggleAccessible;
+    window.parkingSystem.setTheme = setTheme;
+    window.parkingSystem.toggleTheme = toggleTheme;
+})();
+
+/* Accessible helpers: skip link, aria-live announcer, keyboard shortcut */
+(function accessibleHelpers() {
+    function ensureAccessibleHelpers() {
+        // Skip link
+        if (!document.getElementById('skip-to-content')) {
+            const skip = document.createElement('a');
+            skip.id = 'skip-to-content';
+            skip.className = 'skip-link';
+            skip.href = '#main-content';
+            skip.textContent = 'Saltar al contenido (Presiona Enter)';
+            document.body.insertBefore(skip, document.body.firstChild);
+        }
+
+        // Ensure main content has id
+        const main = document.querySelector('main.main-content');
+        if (main && !main.id) main.id = 'main-content';
+
+        // aria-live announcer
+        if (!document.getElementById('live-announcer')) {
+            const live = document.createElement('div');
+            live.id = 'live-announcer';
+            live.setAttribute('role', 'status');
+            live.setAttribute('aria-live', 'polite');
+            live.setAttribute('aria-atomic', 'true');
+            live.style.position = 'absolute';
+            live.style.width = '1px';
+            live.style.height = '1px';
+            live.style.margin = '-1px';
+            live.style.border = '0';
+            live.style.padding = '0';
+            live.style.clip = 'rect(0 0 0 0)';
+            live.style.overflow = 'hidden';
+            document.body.appendChild(live);
+        }
+
+        // Keyboard shortcut: Shift+Alt+M focuses main content
+        if (!window.__accessibleShortcutAdded) {
+            window.addEventListener('keydown', function(e) {
+                if (e.shiftKey && e.altKey && (e.key === 'M' || e.key === 'm')) {
+                    const target = document.getElementById('main-content');
+                    if (target) {
+                        e.preventDefault();
+                        target.setAttribute('tabindex', '-1');
+                        target.focus({ preventScroll: false });
+                    }
+                }
+            });
+            window.__accessibleShortcutAdded = true;
+        }
+    }
+
+    function removeAccessibleHelpers() {
+        const skip = document.getElementById('skip-to-content');
+        if (skip) skip.remove();
+        const live = document.getElementById('live-announcer');
+        if (live) live.remove();
+        // Note: we don't remove the keydown listener to avoid complex handler removal; it's inert when no main-content exists
+    }
+
+    // Expose an announce helper
+    window.parkingSystem.announce = function(message) {
+        const live = document.getElementById('live-announcer');
+        if (live) {
+            // Clear then set to ensure screen-readers notice repeated messages
+            live.textContent = '';
+            setTimeout(() => live.textContent = message, 50);
+        }
+    };
+
+    // Ensure helpers are present if accessible mode already enabled on load
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.documentElement.classList.contains('accessible-mode')) ensureAccessibleHelpers();
+    });
+})();
+
+// Insert accessibility and theme buttons into any sidebar-footer on the page (idempotente)
+(function insertAccessibilityButtons() {
+    function createBtn(id, iconClass, text, onClick) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = id;
+        btn.className = 'nav-item';
+        btn.style.width = '100%';
+        btn.style.textAlign = 'left';
+        btn.style.background = 'none';
+        btn.style.border = 'none';
+        btn.style.cursor = 'pointer';
+        btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${text}`;
+        btn.addEventListener('click', onClick);
+        return btn;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const footers = document.querySelectorAll('.sidebar-footer');
+        footers.forEach(footer => {
+            // don't insert if already present by id or existing onclick handlers (handles manual additions)
+            if (footer.querySelector('#accessibility-toggle-js') || footer.querySelector('button[onclick*="toggleAccessible"]')) return;
+
+            const btnAccess = createBtn('accessibility-toggle-js', 'fa-universal-access', 'Modo Accesible', () => window.parkingSystem.toggleAccessible());
+            const btnTheme = createBtn('theme-toggle-js', 'fa-circle-half-stroke', 'Tema (claro/oscuro/auto)', () => window.parkingSystem.toggleTheme());
+
+            // Insert before logout link if exists
+            const logoutLink = footer.querySelector('a[href*="logout.php"]');
+            if (logoutLink) {
+                footer.insertBefore(btnAccess, logoutLink);
+                footer.insertBefore(btnTheme, logoutLink);
+            } else {
+                footer.appendChild(btnAccess);
+                footer.appendChild(btnTheme);
+            }
+        });
+    });
+})();

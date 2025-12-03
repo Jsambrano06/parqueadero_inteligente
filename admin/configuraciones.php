@@ -34,6 +34,8 @@ $mensajes = obtenerMensajes();
     <title>Configuraciones - <?php echo htmlspecialchars($nombre_parqueadero); ?></title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../assets/js/tutorial.js"></script>
+    <script src="../assets/js/tutorials.js"></script>
 </head>
 <body>
     <div class="layout-wrapper">
@@ -71,6 +73,9 @@ $mensajes = obtenerMensajes();
             </nav>
 
             <div class="sidebar-footer">
+                <button onclick="startTutorial()" class="nav-item" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer;">
+                    <i class="fa-solid fa-graduation-cap"></i> Tutorial
+                </button>
                 <a href="../public/logout.php" class="nav-item">
                     <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
                 </a>
@@ -278,31 +283,31 @@ $mensajes = obtenerMensajes();
                         <h3><i class="fa-solid fa-circle-info"></i> Información del Sistema</h3>
                     </div>
                     <div class="card-body">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                            <div style="padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Versión del Sistema</div>
-                                <div style="font-size: 18px; font-weight: 600; color: #1e293b;">v1.0.0</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div style="padding: 16px; background: var(--surface-color, #f8fafc); border-radius: 8px; border-left: 4px solid var(--color-primario, #3b82f6);">
+                                <div style="font-size: 13px; color: var(--text-muted, #64748b); margin-bottom: 4px;">Versión del Sistema</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--text-color, #1e293b);">v1.0.0</div>
                             </div>
 
-                            <div style="padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #10b981;">
-                                <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Base de Datos</div>
-                                <div style="font-size: 18px; font-weight: 600; color: #1e293b;">MySQL / MariaDB</div>
+                            <div style="padding: 16px; background: var(--surface-color, #f8fafc); border-radius: 8px; border-left: 4px solid var(--color-exito, #10b981);">
+                                <div style="font-size: 13px; color: var(--text-muted, #64748b); margin-bottom: 4px;">Base de Datos</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--text-color, #1e293b);">MySQL / MariaDB</div>
                             </div>
 
-                            <div style="padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Versión PHP</div>
-                                <div style="font-size: 18px; font-weight: 600; color: #1e293b;"><?php echo phpversion(); ?></div>
+                            <div style="padding: 16px; background: var(--surface-color, #f8fafc); border-radius: 8px; border-left: 4px solid var(--color-advertencia, #f59e0b);">
+                                <div style="font-size: 13px; color: var(--text-muted, #64748b); margin-bottom: 4px;">Versión PHP</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--text-color, #1e293b);"><?php echo phpversion(); ?></div>
                             </div>
 
-                            <div style="padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #ef4444;">
-                                <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Servidor</div>
-                                <div style="font-size: 18px; font-weight: 600; color: #1e293b;"><?php echo $_SERVER['SERVER_SOFTWARE'] ?? 'N/A'; ?></div>
+                            <div style="padding: 16px; background: var(--surface-color, #f8fafc); border-radius: 8px; border-left: 4px solid var(--color-peligro, #ef4444);">
+                                <div style="font-size: 13px; color: var(--text-muted, #64748b); margin-bottom: 4px;">Servidor</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--text-color, #1e293b);"><?php echo $_SERVER['SERVER_SOFTWARE'] ?? 'N/A'; ?></div>
                             </div>
                         </div>
 
-                        <div style="margin-top: 24px; padding: 16px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe;">
+                        <div style="margin-top: 24px; padding: 16px; background: var(--surface-color, #eff6ff); border-radius: 8px; border: 1px solid var(--border-color, #bfdbfe); color: var(--text-color);">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <i class="fa-solid fa-circle-check" style="font-size: 24px; color: #3b82f6;"></i>
+                                <i class="fa-solid fa-circle-check text-primary" style="font-size: 24px;"></i>
                                 <div>
                                     <strong>Sistema de Parqueadero Inteligente</strong><br>
                                     <small class="text-muted">

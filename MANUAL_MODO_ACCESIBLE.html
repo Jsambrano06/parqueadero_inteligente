@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual - Modo Accesible (Parqueadero Inteligente)</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#0f172a;background:#fff}
+    header{border-left:6px solid #ff8c00;padding:12px 16px;background:#fff9f0}
+    h1{font-size:20px;margin:0}
+    h2{color:#111;margin-top:20px}
+    p{line-height:1.5}
+    code, pre{background:#f4f4f6;padding:6px;border-radius:4px;display:block}
+    .notice{background:#fff4e5;border-left:4px solid #ff8c00;padding:10px;border-radius:6px}
+    ul{margin-left:18px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Manual — Modo Accesible</h1>
+    <p>Proyecto: Parqueadero Inteligente — Documento local sin enlaces (archivo independiente).</p>
+  </header>
+
+  <section>
+    <h2>Resumen</h2>
+    <p>El <strong>Modo Accesible</strong> mejora la usabilidad para personas con baja visión, movilidad reducida y usuarias de lectores de pantalla. Se activa/desactiva desde la barra lateral o programáticamente. El modo respeta los temas (claro/oscuro) y aplica ajustes de contraste, foco, tamaño de elementos y atajos de teclado mínimos exigidos por accesibilidad.</p>
+  </section>
+
+  <section>
+    <h2>Características incluidas</h2>
+    <ul>
+      <li><strong>Foco muy visible:</strong> outline de 6px + glow en color vívido <code>#ff8c00</code> (naranja) para destacar el elemento con foco.</li>
+      <li><strong>Enlace "Saltar al contenido":</strong> link que aparece al pulsar Tab al inicio y permite saltar la navegación repetitiva (barra lateral).</li>
+      <li><strong>Región ARIA Live:</strong> un <code>div#live-announcer</code> con <code>role="status" aria-live="polite"</code> para anuncios dinámicos desde JS.</li>
+      <li><strong>Atajo de teclado:</strong> <code>Shift + Alt + M</code> para enfocar rápidamente el contenido principal.</li>
+      <li><strong>Tamaños de objetivo táctil:</strong> botones y enlaces aumentados a mínimo recomendado (≈44×44 px).</li>
+      <li><strong>Contrastes reforzados:</strong> bordes y fondos optimizados para buena legibilidad en modo claro y oscuro.</li>
+      <li><strong>Opciones CSS variables:</strong> colores y comportamientos configurables vía variables en <code>assets/css/estilos.css</code>.</li>
+      <li><strong>Compatibilidad con temas:</strong> funciona junto a los modos <em>dark</em>, <em>light</em> y <em>auto</em>.</li>
+      <li><strong>Exclusión del mapa:</strong> el canvas del mapa y los elementos posicionados (<code>.puesto</code>) están explícitamente excluidos de los cambios tipográficos para evitar desajustes y solapamientos.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Cómo usarlo (usuario)</h2>
+    <ol>
+      <li>Abrir cualquier página del panel de administración (por ejemplo: <code>/admin/mapa.php</code>).</li>
+      <li>En la barra lateral (pie) seleccionar <em>Modo Accesible</em>, o desde la consola ejecutar:
+        <pre><code>window.parkingSystem.setAccessible(true)</code></pre>
+      </li>
+      <li>Al activarlo verá: mayor tamaño de texto en controles, foco naranja notable, skip-link al inicio y el atajo Shift+Alt+M.</li>
+      <li>Para desactivar: use nuevamente el botón o <code>window.parkingSystem.setAccessible(false)</code>.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Atajos de teclado</h2>
+    <ul>
+      <li><strong>Tab</strong>: Navegación por elementos interactivos; la primera pulsación revelará <strong>Saltar al contenido</strong>.</li>
+      <li><strong>Enter</strong> sobre el skip-link: lleva el foco al contenido principal.</li>
+      <li><strong>Shift + Alt + M</strong>: enfoca el elemento principal del contenido (<code>main.main-content</code>).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>APIs útiles para desarrolladores</h2>
+    <p>Desde JS puedes anunciar mensajes para lectores de pantalla y activar el modo:</p>
+    <pre><code>// Activar/desactivar
+window.parkingSystem.setAccessible(true);
+
+// Anunciar texto (aria-live)
+window.parkingSystem.announce('Configuración guardada correctamente');
+    </code></pre>
+    <p>Recomendación: llamar a <code>parkingSystem.announce()</code> cuando ocurra una acción relevante (guardar, eliminar, error, cambio de estado) para que usuarias de lectores reciban retroalimentación.</p>
+  </section>
+
+  <section>
+    <h2>Cómo personalizar (técnico)</h2>
+    <p>Las variables principales están en <code>assets/css/estilos.css</code>. Ejemplos:</p>
+    <pre><code>/* cambiar color del outline visible en modo accesible */
+:root { --accessible-focus-color: #ff8c00; }
+
+/* cambiar tamaños y espaciado solo en modo accesible */
+html.accessible-mode .btn { min-height: 48px; padding: 14px 20px; }
+    </code></pre>
+    <p>Nota: el mapa (<code>assets/css/mapa.css</code>) contiene reglas específicas que evitan que los cambios tipográficos rompan la disposición de los puestos; no modifique esas reglas a menos que verifique visualmente la página del mapa.</p>
+  </section>
+
+  <section>
+    <h2>Pruebas recomendadas (lista rápida)</h2>
+    <ul>
+      <li>Comprobar foco con teclado (Tab) en páginas: header, navegación, formulario, botones y modal.</li>
+      <li>Verificar que el skip-link aparece y funciona.</li>
+      <li>Usar lector de pantalla (NVDA, VoiceOver) y confirmar que los anuncios emitidos con <code>announce()</code> se leen.</li>
+      <li>Probar en modo oscuro y claro (tema) para asegurar contraste de textos y controles.</li>
+      <li>Probar en dispositivos táctiles que los botones sean fáciles de pulsar (objetivos grandes).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Limitaciones y notas</h2>
+    <ul>
+      <li>El modo accesible evita forzar tipografía sobre elementos absolutamente posicionados del mapa para prevenir desajustes (ej.: códigos de puesto, iconos). Esto significa que la legibilidad del texto dentro del mapa depende de las reglas específicas del CSS del mapa.</li>
+      <li>Algunas bibliotecas externas (modales inyectados dinámicamente, plugins) pueden necesitar llamadas explícitas a <code>parkingSystem.announce()</code> tras acciones para una experiencia completa de lectura.</li>
+      <li>Si detectas elementos todavía con foco difícil de ver, indica la ruta/selector y lo ajusto.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Archivos modificados (referencia)</h2>
+    <ul>
+      <li><code>assets/css/estilos.css</code> — variables, focus styles, skip-link styles, accesible-mode rules.</li>
+      <li><code>assets/css/mapa.css</code> — se agregaron variables semánticas y se preservó comportamiento del mapa.</li>
+      <li><code>assets/js/global.js</code> — inyección de skip-link, announcer <code>#live-announcer</code>, <code>parkingSystem.announce()</code>, atajo de teclado.</li>
+      <li><code>assets/js/tutorial.js</code> — tooltips respetan variables de tema.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Contacto y próximos pasos</h2>
+    <p>Si quieres que automatice anuncios en puntos clave (guardar configuración, cambiar estado de puesto, crear/eliminar puesto), puedo añadir llamadas a <code>parkingSystem.announce()</code> en esos handlers. Dime si lo hago ahora.</p>
+  </section>
+
+  <footer style="margin-top:30px;color:#666;font-size:13px">Documento generado automáticamente — Modo Accesible (Parqueadero Inteligente)</footer>
+</body>
+</html>

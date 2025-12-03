@@ -92,14 +92,30 @@ try {
             "Placa: {$movimiento['placa']}, Puesto: {$movimiento['puesto_codigo']}, Total: $total_pagar"
         );
         
+        // Incluir timestamps ISO para frontend
+        try {
+            $hora_entrada_iso = (new DateTime($movimiento['hora_entrada']))->format(DATE_ATOM);
+        } catch (Exception $e) {
+            $hora_entrada_iso = $movimiento['hora_entrada'];
+        }
+
+        try {
+            $hora_salida_iso = (new DateTime($hora_salida))->format(DATE_ATOM);
+        } catch (Exception $e) {
+            $hora_salida_iso = $hora_salida;
+        }
+
         echo json_encode([
             'success' => true,
             'message' => 'Salida registrada correctamente',
+            'movimiento_id' => $movimiento_id,
             'puesto_codigo' => $movimiento['puesto_codigo'],
             'placa' => $movimiento['placa'],
             'tipo_vehiculo' => $movimiento['tipo_vehiculo'],
             'hora_entrada' => formatearFecha($movimiento['hora_entrada']),
             'hora_salida' => formatearFecha($hora_salida),
+            'hora_entrada_iso' => $hora_entrada_iso,
+            'hora_salida_iso' => $hora_salida_iso,
             'tiempo_total' => $tiempo_total,
             'total_pagar' => $total_pagar
         ]);

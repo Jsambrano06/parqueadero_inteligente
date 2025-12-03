@@ -139,6 +139,10 @@ function calcularCobro($hora_entrada, $hora_salida, $tarifa_hora) {
     // Obtener configuraciones
     $redondeo = (int)obtenerConfiguracion('redondeo_minutos');
     $tarifa_minima = (int)obtenerConfiguracion('tarifa_minima_horas');
+
+    // Valores por defecto seguros
+    if ($redondeo <= 0) $redondeo = 15; // 15 minutos por defecto
+    if ($tarifa_minima <= 0) $tarifa_minima = 1; // 1 hora por defecto
     
     // Calcular diferencia en minutos
     $entrada = new DateTime($hora_entrada);
@@ -146,7 +150,7 @@ function calcularCobro($hora_entrada, $hora_salida, $tarifa_hora) {
     $diferencia = $entrada->diff($salida);
     $minutos = ($diferencia->days * 24 * 60) + ($diferencia->h * 60) + $diferencia->i;
     
-    // Redondear según configuración (por defecto 15 minutos)
+    // Redondear según configuración
     $min_redondeados = ceil($minutos / $redondeo) * $redondeo;
     
     // Convertir a horas
